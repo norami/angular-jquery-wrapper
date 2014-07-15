@@ -17,18 +17,25 @@
                         }
                         return $.isArray(obj) ? obj : [obj];
                     }
-                    function parseFields(fields) {
+                    function parseFields(fields, options) {
                         return $.map(fields || [], function (field) {
                             field = angular.isString(field) ?  {'name': field} : field;
                             field.attrName = [schema.prefix + capitalize(field.name)].concat(ensureArray(field.attrName) || []);
-                            field.event = field.event || schema.prefix + field.name;
+                            if (field.interactive) {
+                                field.event = field.event || schema.prefix + field.name;
+                            }
+                            if (options.param) {
+                                field.getparam = field.getparam || options.param.concat([field.name]);
+                                field.setparam = field.setparam || options.param.concat([field.name]);
+                            }
+                            field.type = options.type;
                             return [field];
                         });
                     }
                     function firstElement(dict, keys) {
                         keys = ensureArray(keys);
                         var value = null, i;
-                        for (i = 0; i < keys.length; i++) {
+                        for (i = 0; i < keys.length; i += 1) {
                             value = dict[keys[i]];
                             if (value) {
                                 return value;
@@ -37,82 +44,74 @@
                         return value;
                     }
                     var
-                        method = parseFields(schema.method),
-                        option = parseFields(schema.option),
-                        event = parseFields(schema.event),
-                        interactiveOption = $.map(option, function (o) {return o.interactive ? [o] : null; }),
-                        interactiveMethod = $.map(method, function (o) {return o.interactive ? [o] : null; });
+                        method = parseFields(schema.method, {param: [], type: 'method'}),
+                        option = parseFields(schema.option, {param: ['option'], type: 'option'}),
+                        event = parseFields(schema.event, {type: 'event'});
+                    console.log('attrMap', schema.widget, attrMap);
                     return {
                         restrict: 'EA',
+                        require: '?ngModel',
                         compile: function (element, attr) {
-                            var fieldAccess = {};
+                            var accessors = {};
                             angular.forEach([].concat(method, option, event), function (field) {
                                 var fieldExp = firstElement(attr, field.attrName);
                                 if (!fieldExp) {
                                     return;
                                 }
-                                fieldAccess[field.name] = $parse(fieldExp);
+                                accessors[field.name] = $parse(fieldExp);
                             });
-                            return function (scope) {
-                                var options = {};
-                                angular.forEach(option, function (field) {
-                                    var fieldExp = firstElement(attr, field.attrName);
-                                    if (!fieldExp) {
-                                        return;
+                            return function (scope, element, attr, ngModel) {
+                                var initialOptions = angular.copy(schema.initialOptions || {});
+                                angular.forEach([].concat(option, method), function (field) {
+                                    var accessor = accessors[field.name];
+                                    if (!accessor && (!field.ngModel || !ngModel)) { return; }
+                                    /* initial options*/
+                                    if (field.type === 'option') {
+                                        if (field.ngModel && ngModel) {
+                                            initialOptions[field.name] = ngModel.$viewValue;
+                                        } else {
+                                            initialOptions[field.name] = accessor(scope);
+                                        }
                                     }
-                                    scope.$watch(fieldExp, function (newVal) {
-                                        element[schema.widget]('option', field.name, newVal);
-                                    }, true);
-                                    options[field.name] = fieldAccess[field.name](scope);
-                                });
-                                element[schema.widget](options);
-                                angular.forEach(method, function (field) {
-                                    var fieldExp = firstElement(attr, field.attrName);
-                                    if (!fieldExp) {
-                                        return;
+                                    /* model -> view */
+                                    console.log(field, ngModel);
+                                    if (field.ngModel && ngModel) {
+                                        console.log('ngModel');
+                                        ngModel.$render = function () {
+                                            element[schema.widget].apply(element, field.setparam.concat([ngModel.$viewValue]));
+                                        };
+                                    } else {
+                                        scope.$watch(accessor, function (newVal) {
+                                            element[schema.widget].apply(element, field.setparam.concat([newVal]));
+                                        }, true);
                                     }
-                                    scope.$watch(fieldExp, function (newVal) {
-                                        element[schema.widget](field.name, newVal);
-                                    }, true);
-                                });
-                                angular.forEach(interactiveOption, function (field) {
-                                    if (!fieldAccess[field.name]) {
-                                        return;
-                                    }
-                                    element.on(field.event, function (event, ui) {
-                                        scope.$apply(function () {
-                                            var value = field.get ? field.get(element, schema, event, ui) : (
-                                                field.eventField ? ui[field.eventField] : (
-                                                    element[schema.widget]('option', field.name)
-                                                )
-                                            );
-                                            fieldAccess[field.name].assign(scope, value);
+                                    /* view -> model */
+                                    if (field.interactive) {
+                                        element.on(field.event, function (event, ui) {
+                                            scope.$apply(function () {
+                                                var value = field.get ? field.get(element, schema, event, ui) : (
+                                                    field.eventField ? ui[field.eventField] : (
+                                                        element[schema.widget].apply(element, field.getparam)
+                                                    )
+                                                );
+                                                if (field.ngModel && ngModel) {
+                                                    ngModel.$setViewValue(value);
+                                                } else {
+                                                    accessor.assign(scope, value);
+                                                }
+                                            });
                                         });
-                                    });
-                                });
-                                angular.forEach(interactiveMethod, function (field) {
-                                    if (!fieldAccess[field.name]) {
-                                        return;
                                     }
-                                    element.on(field.event, function (event, ui) {
-                                        scope.$apply(function () {
-                                            var value = field.get ? field.get(element, schema, event, ui) : (
-                                                field.eventField ? ui[field.eventField] : (
-                                                    element[schema.widget]('option', field.name)
-                                                )
-                                            );
-                                            fieldAccess[field.name].assign(scope, value);
-                                        });
-                                    });
                                 });
                                 angular.forEach(event, function (field) {
-                                    if (!fieldAccess[field.name]) {
-                                        return;
-                                    }
+                                    var accessor = accessors[field.name];
+                                    if (!accessor) { return; }
+                                    /* event */
                                     element.on(field.event, function (event, ui) {
-                                        fieldAccess[field.name](scope)(event, ui);
+                                        accessor(scope)(event, ui);
                                     });
                                 });
+                                element[schema.widget](initialOptions);
                             };
                         }
                     };
@@ -128,5 +127,4 @@
                 addDirectives: addDirectives
             };
         });
-
 }(angular, jQuery));

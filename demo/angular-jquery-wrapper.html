@@ -123,9 +123,16 @@
                         <button jqw-button jqw-button-icons="{ primary: 'ui-icon-gear', secondary: 'ui-icon-triangle-1-s'}" jqw-button-text="true">label</button>
                         <button>default button</button>
 
-                        <h3>Datepicker</h3>
+                        <h3>Datepicker(model as string)</h3>
                         normal:<input ng-model="date">
                         datepicker:<input ng-model="date" jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'"/>
+
+                        <h3>Datepicker(model as Date)</h3>
+                        datepicker:<input jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'" jqw-datepicker-date="dateObject"/>
+                        {{dateObject}}
+
+                        <h3>Datepicker(inline)</h3>
+                        datepicker:<div jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'" jqw-datepicker-date="dateObject"/></div>
 
                         <h3>Menu</h3>
                         <ul jqw-menu>

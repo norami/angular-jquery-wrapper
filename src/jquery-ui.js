@@ -1,3 +1,4 @@
+/*global angular, jQuery, console */
 
 /* module jqueryui */
 
@@ -19,7 +20,7 @@
                         interactive: true,
                         name: 'active',
                         event: 'accordionactivate',
-                        attrName: 'ngModel'
+                        ngModel: true
                     }
                 ],
                 'event': [
@@ -100,9 +101,6 @@
                     "navigationAsDateFormat",
                     "nextText",
                     "numberOfMonths",
-                    "onChangeMonthYear",
-                    "onClose",
-                    "onSelect",
                     "prevText",
                     "selectOtherMonths",
                     "shortYearCutoff",
@@ -117,7 +115,31 @@
                     "stepMonths",
                     "weekHeader",
                     "yearRange",
-                    "yearSuffix"            ]
+                    "yearSuffix"
+                ],
+                method: [
+                    {
+                        interactive: true,
+                        name: 'date',
+                        getparam: ['getDate'],
+                        setparam: ['setDate'],
+                        event: 'jqwdatepickerselect',
+                        attrName: 'date'
+                    }
+                ],
+                initialOptions: {
+                    onSelect: function () {
+                        $(this)
+                            .trigger('jqwdatepickerselect')
+                            .trigger('change');/* default behaviour of onSelect*/
+                    },
+                    onClose: function () {
+                        $(this).trigger('jqwdatepickerclose');
+                    },
+                    onChangeMonthYearType: function () {
+                        $(this).trigger('jqwdatepickerchangemonthyeartype');
+                    }
+                }
             },
             {
                 'widget': 'dialog',
@@ -236,7 +258,7 @@
                         name: 'value',
                         event: 'change spin',
                         eventField: 'value',
-                        attrName: 'ngModel'
+                        ngModel: true
                     }
                 ],
                 event: [
@@ -262,7 +284,7 @@
                         name: 'value',
                         event: 'slide',
                         eventField: 'value',
-                        attrName: 'ngModel'
+                        ngModel: true
                     },
                     {
                         interactive: true,
@@ -294,7 +316,7 @@
                         interactive: true,
                         name: 'active',
                         event: 'tabsactivate',
-                        attrName: 'ngModel'
+                        ngModel: true
                     }
                 ],
                 'event': [

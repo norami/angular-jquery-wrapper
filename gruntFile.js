@@ -71,11 +71,11 @@ module.exports = function (grunt) {
         concat: {
             dist: {
                 src: ['src/core.js', 'src/*.js'],
-                dest: 'dist/angular-jquery-wrapper-all.js'
+                dest: 'dist/angular-jquery-wrapper.js'
             },
             core: {
                 src: ['src/core.js'],
-                dest: 'dist/angular-jquery-wrapper.js'
+                dest: 'dist/angular-jquery-wrapper-core.js'
             }
         },
         changelog: {

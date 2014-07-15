@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <title>Angular jQuery Wrapper Demo</title>
+    <link rel="stylesheet" href="../bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap-theme.css"/>
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="../bower_components/jquery-ui/jquery-ui.js"></script>
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../dist/angular-jquery-wrapper-all.js"></script>
+    <script>
+        var app = angular.module("App", ['jqueryWrapper']);
+        app.controller("FormController", function($scope){
+            $scope.slider = 15
+            $scope.range = [12, 17]
+            $scope.dialogBinding = "data"
+            $scope.dialogTitle = "dialog title"
+        })
+    </script>
+
+    <style>
+        body {
+            padding-top: 50px;
+        }
+        .starter-template {
+            padding: 40px 15px;
+        }
+        .row{
+            margin: 0.2em
+        }
+        .ui-menu { width: 150px; }
+    </style>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Angular-jQuery-Wrapper</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="starter-template">
+        <h1>Angular-jQuery-Wrapper Demo</h1>
+        <p class="lead"></p>
+
+        <article ng-app="App" >
+
+            <section ng-controller="FormController" class="row">
+                <div class="col-sm-8">
+                    <div id="number" class="row">
+                        <h3>Slider / Progressbar / Spinner</h3>
+                        default: <input class="row" type="number" ng-model="slider" step="1" min="10" max="20"/>
+                        Spinner: <input jqw-spinner class="row" type="number" ng-model="slider" step="1" min="10" max="20"/>
+
+
+                        <div class="row" jqw-slider ng-model="slider" jqw-slider-max="20" jqw-slider-min="10" jqw-slider-step="1" ></div>
+                        <div class="row" jqw-progressbar jqw-progressbar-value="slider" jqw-progressbar-max="20" ></div>
+                        value:{{slider}}
+
+                        <h3>Slider(range)</h3>
+                        <input class="row" type="number" ng-model="range[0]" step="1" min="10" max="20"/>
+                        <input class="row" type="number" ng-model="range[1]" step="1" min="10" max="20"/>
+                        <div class="row" jqw-slider jqw-slider-values="range" jqw-slider-range="true" jqw-slider-max="20" jqw-slider-min="10" jqw-slider-step="1" ></div>
+                        value:{{range}}
+
+                        <h3>Accordion / Tabs</h3>
+                        <input class="row" type="number" ng-model="accordion"/>
+                        <div jqw-accordion ng-model="accordion">
+                            <h3>First header</h3>
+                            <div>First content panel</div>
+                            <h3>Second header</h3>
+                            <div>Second content panel</div>
+                            <h3>Third header</h3>
+                            <div>Third content panel</div>
+                        </div>
+                        <div jqw-tabs ng-model="accordion">
+                            <ul>
+                                <li><a href="#tabs-1">Nunc tincidunt</a></li>
+                                <li><a href="#tabs-2">Proin dolor</a></li>
+                                <li><a href="#tabs-3">Aenean lacinia</a></li>
+                            </ul>
+                            <div id="tabs-1">
+                                <p>Proin elit arcu, rutrum commodo, vehicula tempus, commodo a, risus. Curabitur nec arcu. Donec sollicitudin mi sit amet mauris. Nam elementum quam ullamcorper ante. Etiam aliquet massa et lorem. Mauris dapibus lacus auctor risus. Aenean tempor ullamcorper leo. Vivamus sed magna quis ligula eleifend adipiscing. Duis orci. Aliquam sodales tortor vitae ipsum. Aliquam nulla. Duis aliquam molestie erat. Ut et mauris vel pede varius sollicitudin. Sed ut dolor nec orci tincidunt interdum. Phasellus ipsum. Nunc tristique tempus lectus.</p>
+                            </div>
+                            <div id="tabs-2">
+                                <p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
+                            </div>
+                            <div id="tabs-3">
+                                <p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
+                                <p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
+                            </div>
+                        </div>
+
+                        value:{{accordion}}
+                        <h3>Autocomplete</h3>
+                        <input class="row" ng-model="autocomplete" jqw-autocomplete jqw-autocomplete-source="['abc','qqq']"/>
+
+
+                        <h3>Dialog</h3>
+                        title:<input ng-model="dialogTitle">
+                        content:<input ng-model="dialogBinding">
+                        <button jqw-dialog-open="[jqw-dialog]" jqw-button jqw-button-icons="{ primary: 'ui-icon-gear'}">&nbsp;</button>
+                        <div jqw-dialog jqw-dialog-auto-open="false" jqw-dialog-title="dialogTitle">
+                            This is dialog contents
+                            <input ng-model="dialogBinding">
+                        </div>
+
+                        <h3>Button</h3>
+                        <button jqw-button jqw-button-icons="{ primary: 'ui-icon-gear', secondary: 'ui-icon-triangle-1-s'}" jqw-button-text="true">label</button>
+                        <button>default button</button>
+
+                        <h3>Datepicker</h3>
+                        normal:<input ng-model="date">
+                        datepicker:<input ng-model="date" jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'"/>
+
+                        <h3>Menu</h3>
+                        <ul jqw-menu>
+                            <li><span class="ui-icon ui-icon-disk"></span>Save</li>
+                            <li><span class="ui-icon ui-icon-zoomin"></span>Zoom In</li>
+                            <li><span class="ui-icon ui-icon-zoomout"></span>Zoom Out</li>
+                            <li class="ui-state-disabled"><span class="ui-icon ui-icon-print"></span>Print...</li>
+                            <li>
+                                Playback
+                                <ul>
+                                    <li><span class="ui-icon ui-icon-seek-start"></span>Prev</li>
+                                    <li><span class="ui-icon ui-icon-stop"></span>Stop</li>
+                                    <li><span class="ui-icon ui-icon-play"></span>Play</li>
+                                    <li><span class="ui-icon ui-icon-seek-end"></span>Next</li>
+                                </ul>
+                            </li>
+                            <li>Learn more about this menu</li>
+                        </ul>
+
+                        <h3>selectmenu</h3>
+                        <select name="files" id="files">
+                            <optgroup label="Scripts">
+                                <option value="jquery">jQuery.js</option>
+                                <option value="jqueryui">ui.jQuery.js</option>
+                            </optgroup>
+                            <optgroup label="Other files">
+                                <option value="somefile">Some unknown file</option>
+                                <option value="someotherfile">Some other file with a very long option text</option>
+                            </optgroup>
+                        </select>
+
+                        <h3>tooltip</h3>
+                        jQuery UI Tooltip:
+                        <div jqw-tooltip style="margin-left:20px">
+                            <p><a href="#" title="That&apos;s what this widget is">Tooltips</a> can be attached to any element. When you hover
+                                the element with your mouse, the title attribute is displayed in a little box next to the element, just like a native tooltip.</p>
+                            <p>But as it's not a native tooltip, it can be styled. Any themes built with
+                                <a href="http://jqueryui.com/themeroller/" title="ThemeRoller: jQuery UI&apos;s theme builder application">ThemeRoller</a>
+                                will also style tooltips accordingly.</p>
+                            <p>Tooltips are also useful for form elements, to show some additional information in the context of each field.</p>
+                            <p><label for="age1">Your age:</label><input id="age1" title="We ask for your age only for statistical purposes."></p>
+                            <p>Hover the field to see the tooltip.</p>
+                        </div>
+                        Default Tooltip:
+                        <div style="margin-left:2em">
+                            <p><a href="#" title="That&apos;s what this widget is">Tooltips</a> can be attached to any element. When you hover
+                                the element with your mouse, the title attribute is displayed in a little box next to the element, just like a native tooltip.</p>
+                            <p>But as it's not a native tooltip, it can be styled. Any themes built with
+                                <a href="http://jqueryui.com/themeroller/" title="ThemeRoller: jQuery UI&apos;s theme builder application">ThemeRoller</a>
+                                will also style tooltips accordingly.</p>
+                            <p>Tooltips are also useful for form elements, to show some additional information in the context of each field.</p>
+                            <p><label for="age2">Your age:</label><input id="age2" title="We ask for your age only for statistical purposes."></p>
+                            <p>Hover the field to see the tooltip.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                </div>
+                <div class="col-sm-2">
+                </div>
+            </section>
+
+        </article>
+    </div>
+
+</div><!-- /.container -->
+
+
+
+</body>
+</html>

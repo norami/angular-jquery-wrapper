@@ -6,6 +6,7 @@
 # Supporting Library
 
 1. jQuery UI
+2. jQuery MultiDatesPicker
 
 # Requirements
 

@@ -1,6 +1,6 @@
 {
   "name": "angular-jquery-wrapper",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Provide a service to wrap any jQuery plugins through general way.",
   "author": "https://github.com/norami/angular-jquery-wrapper/graphs/contributors",
   "license": "MIT",

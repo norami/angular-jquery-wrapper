@@ -356,11 +356,10 @@
                     "open"
                 ]
             }
-        ],
-        module = angular.module('jqueryWrapper');
-    angular.injector(['jqueryWrapper']).invoke(['jqueryWrapper', function (jqueryWrapper) {
-        jqueryWrapper.addDirectives(module, schemas);
-        module.directive("jqwDialogOpen", function () {
+        ];
+    angular.injector(['jqueryWrapperBuilder']).invoke(['jqueryWrapperBuilder', function (jqueryWrapperBuilder) {
+        jqueryWrapperBuilder.addDirectives(schemas);
+        jqueryWrapperBuilder.module.directive("jqwDialogOpen", function () {
             return {
                 compile: function (element, attrs) {
                     return function () {

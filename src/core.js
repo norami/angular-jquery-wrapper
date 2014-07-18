@@ -4,9 +4,16 @@
 
 (function (angular, $) {
     'use strict';
-    angular.module('jqueryWrapper', [])
-        .service('jqueryWrapper', function () {
-            function addDirective(module, schema) {
+    var module = angular.module('jqueryWrapper', []);
+    angular.module('jqueryWrapperBuilder', [])
+        .service('jqueryWrapperBuilder', function () {
+            var registeredSchemas = [];
+            function getRegisteredSchemas() {
+                return registeredSchemas;
+            }
+            function addDirective(schema) {
+                if (!$.fn[schema.widget]) { return; }
+                registeredSchemas.push(schema);
                 module.directive(schema.prefix, ['$parse', function ($parse) {
                     function capitalize(str) {
                         return str.charAt(0).toUpperCase() + str.slice(1);
@@ -157,14 +164,16 @@
                     };
                 }]);
             }
-            function addDirectives(module, schemas) {
+            function addDirectives(schemas) {
                 angular.forEach(schemas, function (schema) {
-                    addDirective(module, schema);
+                    addDirective(schema);
                 });
             }
             return {
+                getRegisteredSchemas: getRegisteredSchemas,
                 addDirective: addDirective,
-                addDirectives: addDirectives
+                addDirectives: addDirectives,
+                module: module
             };
         });
 }(angular, jQuery));

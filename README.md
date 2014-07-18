@@ -1,6 +1,6 @@
 # Angular jQuery Wrapper
 
-1. This service generate jQuery-wrapping directives with simple schema data. 
+1. This service generates jQuery-wrapping directives with simple schema data. 
 2. Some jQuery plugins in the next section are ready to use.
 
 # Supporting Library

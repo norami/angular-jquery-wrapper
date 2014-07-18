@@ -17,101 +17,141 @@
                         }
                         return $.isArray(obj) ? obj : [obj];
                     }
-                    function parseFields(fields, options) {
-                        return $.map(fields || [], function (field) {
-                            field = angular.isString(field) ?  {'name': field} : field;
-                            field.attrName = [schema.prefix + capitalize(field.name)].concat(ensureArray(field.attrName) || []);
-                            if (field.interactive) {
-                                field.event = field.event || schema.prefix + field.name;
-                            }
-                            if (options.param) {
-                                field.getparam = field.getparam || options.param.concat([field.name]);
-                                field.setparam = field.setparam || options.param.concat([field.name]);
-                            }
-                            field.type = options.type;
-                            return [field];
-                        });
-                    }
-                    function firstElement(dict, keys) {
-                        keys = ensureArray(keys);
-                        var value = null, i;
-                        for (i = 0; i < keys.length; i += 1) {
-                            value = dict[keys[i]];
-                            if (value) {
-                                return value;
-                            }
+                    function convertField(field, options) {
+                        field = angular.isString(field) ? {'name': field} : field;
+                        field.attrName = [schema.prefix + capitalize(field.name)]
+                            .concat(ensureArray(field.attrName) || [])
+                            .concat(field.ngModel ? ['ngModel'] : []);
+                        if (field.interactive) {
+                            field.event = field.event || schema.prefix + field.name;
                         }
-                        return value;
+                        if (options.param) {
+                            field.getparam = field.getparam || options.param.concat([field.name]);
+                            field.setparam = field.setparam || options.param.concat([field.name]);
+                        }
+                        field.getter = field.getter || (field.eventField ?
+                                function (element, event, ui) {
+                                    return ui[field.eventField];
+                                } :
+                                function (element, event, ui) {
+                                    return element[schema.widget].apply(element, field.getparam);
+                                });
+                        field.setter = field.setter || function (element, value) {
+                            element[schema.widget].apply(element, field.setparam.concat([value]));
+                        };
+                        field.type = options.type;
+                        if (field.type === 'option') {
+                            field.static = field.hasOwnProperty('static') ? field.static : schema.static;
+                        }
+                        return field;
                     }
-                    var
-                        method = parseFields(schema.method, {param: [], type: 'method'}),
-                        option = parseFields(schema.option, {param: ['option'], type: 'option'}),
-                        event = parseFields(schema.event, {type: 'event'});
-                    console.log('attrMap', schema.widget, attrMap);
+                    function fieldToHandler(field, attrName) {
+                        if (field.type === 'event') {
+                            return function eventHandler(accessor, initialOptions, element, scope, ngModel) {
+                                /* event */
+                                element.on(field.event, function (event, ui) {
+                                    accessor(scope)(event, ui);
+                                });
+                            };
+                        }
+                        if (attrName === 'ngModel') {
+                            return function ngModelHandler(accessor, initialOptions, element, scope, ngModel) {
+                                /* initial options*/
+                                if (field.type === 'option') {
+                                    initialOptions[field.name] = ngModel.$viewValue;
+                                }
+                                /* model -> view */
+                                if (!field.static) {
+                                    ngModel.$render = function () {
+                                        field.setter(element, ngModel.$modelValue);
+                                    };
+                                }
+                                /* view -> model */
+                                if (field.interactive) {
+                                    element.on(field.event, function (event, ui) {
+                                        ngModel.$setViewValue(field.getter(element, event, ui));
+                                        if (!scope.$$phase) { scope.$apply(); }
+                                    });
+                                }
+                            };
+                        }
+                        return function valueHandler(accessor, initialOptions, element, scope, ngModel) {
+                            /* initial options*/
+                            if (field.type === 'option') {
+                                initialOptions[field.name] = accessor(scope);
+                            }
+                            /* model -> view */
+                            if (!field.static) {
+                                scope.$watch(accessor, function (val) {
+                                    field.setter(element, val);
+                                }, true);
+                            }
+                            /* view -> model */
+                            if (field.interactive) {
+                                element.on(field.event, function (event, ui) {
+                                    accessor.assign(scope, field.getter(element, event, ui));
+                                    if (!scope.$$phase) { scope.$apply(); }
+                                });
+                            }
+                        };
+                    }
+                    var convertedFields = $.map({
+                            method: {
+                                param: [],
+                                type: 'method'
+                            },
+                            option: {
+                                param: ['option'],
+                                type: 'option'
+                            },
+                            event: {
+                                type: 'event'
+                            }
+                        }, function (parseOption, parseKey, map) {
+                            return $.map(schema[parseKey] || [], function (field) {
+                                return convertField(field, parseOption);
+                            });
+                        }),
+                        ngModelSelectorAttrName = schema.prefix + 'NgModel',
+                        ngModelHandlerMap = {},
+                        handlerMap = {};
+                    angular.forEach(convertedFields, function (field, i) {
+                        angular.forEach(field.attrName, function (attrName) {
+                            if (attrName === 'ngModel') {
+                                ngModelHandlerMap[field.name] = fieldToHandler(field, attrName);
+                            } else {
+                                handlerMap[attrName] = fieldToHandler(field, attrName);
+                            }
+                        });
+                    });
                     return {
                         restrict: 'EA',
                         require: '?ngModel',
                         compile: function (element, attr) {
                             var accessors = {};
-                            angular.forEach([].concat(method, option, event), function (field) {
-                                var fieldExp = firstElement(attr, field.attrName);
-                                if (!fieldExp) {
-                                    return;
-                                }
-                                accessors[field.name] = $parse(fieldExp);
+                            angular.forEach(attr, function (exp, attrName) {
+                                if (!handlerMap[attrName]) { return; }
+                                accessors[attrName] = $parse(exp);
                             });
                             return function (scope, element, attr, ngModel) {
-                                var initialOptions = angular.copy(schema.initialOptions || {});
-                                angular.forEach([].concat(option, method), function (field) {
-                                    var accessor = accessors[field.name];
-                                    if (!accessor && (!field.ngModel || !ngModel)) { return; }
-                                    /* initial options*/
-                                    if (field.type === 'option') {
-                                        if (field.ngModel && ngModel) {
-                                            initialOptions[field.name] = ngModel.$viewValue;
-                                        } else {
-                                            initialOptions[field.name] = accessor(scope);
-                                        }
-                                    }
-                                    /* model -> view */
-                                    console.log(field, ngModel);
-                                    if (field.ngModel && ngModel) {
-                                        console.log('ngModel');
-                                        ngModel.$render = function () {
-                                            element[schema.widget].apply(element, field.setparam.concat([ngModel.$viewValue]));
-                                        };
-                                    } else {
-                                        scope.$watch(accessor, function (newVal) {
-                                            element[schema.widget].apply(element, field.setparam.concat([newVal]));
-                                        }, true);
-                                    }
-                                    /* view -> model */
-                                    if (field.interactive) {
-                                        element.on(field.event, function (event, ui) {
-                                            scope.$apply(function () {
-                                                var value = field.get ? field.get(element, schema, event, ui) : (
-                                                    field.eventField ? ui[field.eventField] : (
-                                                        element[schema.widget].apply(element, field.getparam)
-                                                    )
-                                                );
-                                                if (field.ngModel && ngModel) {
-                                                    ngModel.$setViewValue(value);
-                                                } else {
-                                                    accessor.assign(scope, value);
-                                                }
-                                            });
-                                        });
-                                    }
+                                var initialOptions = angular.copy(schema.initialOptions || {}),
+                                    ngModelFieldName,
+                                    ngModelHandler;
+                                angular.forEach(accessors, function (accessor, attrName) {
+                                    var handler = handlerMap[attrName];
+                                    handler(accessor, initialOptions, element, scope, ngModel);
                                 });
-                                angular.forEach(event, function (field) {
-                                    var accessor = accessors[field.name];
-                                    if (!accessor) { return; }
-                                    /* event */
-                                    element.on(field.event, function (event, ui) {
-                                        accessor(scope)(event, ui);
-                                    });
-                                });
+                                if (ngModel) {
+                                    ngModelFieldName = attr[ngModelSelectorAttrName] || schema.ngModelFieldName;
+                                    ngModelHandler = ngModelHandlerMap[ngModelFieldName];
+                                    if (ngModelHandler) {
+                                        ngModelHandler(null, initialOptions, element, scope, ngModel);
+                                    } else if (attr[ngModelSelectorAttrName]) {
+                                        throw 'field ' + ngModelFieldName + ' is not defined';
+                                    }
+                                }
                                 element[schema.widget](initialOptions);
+                                element.on(schema.on);
                             };
                         }
                     };

@@ -1,13 +1,12 @@
 /*global angular, jQuery, console */
 
-/* module jqueryui */
-
 (function (angular, $) {
     'use strict';
     var schemas = [
             {
                 'widget': 'accordion',
                 'prefix': 'jqwAccordion',
+                'ngModelFieldName': 'active',
                 'option': [
                     'active',
                     'collapsible',
@@ -123,15 +122,21 @@
                         name: 'date',
                         getparam: ['getDate'],
                         setparam: ['setDate'],
-                        event: 'jqwdatepickerselect',
-                        attrName: 'date'
+                        event: 'jqwdatepickerchange'
                     }
                 ],
+                on: {
+                    'change': function () {
+                        $(this)
+                            .trigger('jqwdatepickerchange');
+                    }
+                },
                 initialOptions: {
                     onSelect: function () {
                         $(this)
                             .trigger('jqwdatepickerselect')
-                            .trigger('change');/* default behaviour of onSelect*/
+                            .trigger('change')/* default behaviour of onSelect*/
+                            .blur();
                     },
                     onClose: function () {
                         $(this).trigger('jqwdatepickerclose');
@@ -232,6 +237,7 @@
             {
                 'widget': 'spinner',
                 'prefix': 'jqwSpinner',
+                'ngModelFieldName': 'value',
                 'option': [
                     "culture",
                     "disabled",
@@ -239,15 +245,15 @@
                     "incremental",
                     {
                         'name': "max",
-                        'attrName': "max"
+                        'attrName': "max"/*polyfill*/
                     },
                     {
                         'name': "min",
-                        'attrName': "min"
+                        'attrName': "min"/*polyfill*/
                     },
                     {
                         'name': "step",
-                        'attrName': "step"
+                        'attrName': "step"/*polyfill*/
                     },
                     "numberFormat",
                     "page"
@@ -272,6 +278,7 @@
             {
                 'widget': 'slider',
                 'prefix': 'jqwSlider',
+                'ngModelFieldName': 'value',
                 'option': [
                     'disabled',
                     'max',
@@ -290,7 +297,9 @@
                         interactive: true,
                         name: 'values',
                         event: 'slide',
-                        eventField: 'values'
+                        eventField: 'values',
+                        deepWatch: true,
+                        ngModel: true
                     }
                 ],
                 'event': [
@@ -304,6 +313,7 @@
             {
                 'widget': 'tabs',
                 'prefix': 'jqwTabs',
+                'ngModelFieldName': 'active',
                 'option': [
                     'active',
                     'collapsible',

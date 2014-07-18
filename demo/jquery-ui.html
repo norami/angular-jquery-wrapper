@@ -10,7 +10,8 @@
     <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <script src="../bower_components/jquery-ui/jquery-ui.js"></script>
     <script src="../bower_components/angular/angular.js"></script>
-    <script src="../dist/angular-jquery-wrapper.js"></script>
+    <script src="../src/core.js"></script>
+    <script src="../src/jquery-ui.js"></script>
     <script>
         var app = angular.module("App", ['jqueryWrapper']);
         app.controller("FormController", function($scope){
@@ -42,7 +43,7 @@
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Angular-jQuery-Wrapper</a>
+            <a class="navbar-brand" href="./">Angular-jQuery-Wrapper</a>
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
@@ -74,7 +75,7 @@
                         <h3>Slider(range)</h3>
                         <input class="row" type="number" ng-model="range[0]" step="1" min="10" max="20"/>
                         <input class="row" type="number" ng-model="range[1]" step="1" min="10" max="20"/>
-                        <div class="row" jqw-slider jqw-slider-values="range" jqw-slider-range="true" jqw-slider-max="20" jqw-slider-min="10" jqw-slider-step="1" ></div>
+                        <div class="row" jqw-slider jqw-slider-ng-model="values" ng-model="range" jqw-slider-range="true" jqw-slider-max="20" jqw-slider-min="10" jqw-slider-step="1" ></div>
                         value:{{range}}
 
                         <h3>Accordion / Tabs</h3>
@@ -128,11 +129,9 @@
                         datepicker:<input ng-model="date" jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'"/>
 
                         <h3>Datepicker(model as Date)</h3>
-                        datepicker:<input jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'" jqw-datepicker-date="dateObject"/>
+                        input:<input jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'" jqw-datepicker-date="dateObject"/>
+                        inline:<div jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'" jqw-datepicker-date="dateObject"/></div>
                         {{dateObject}}
-
-                        <h3>Datepicker(inline)</h3>
-                        datepicker:<div jqw-datepicker jqw-datepicker-date-format="'yy/mm/dd'" jqw-datepicker-date="dateObject"/></div>
 
                         <h3>Menu</h3>
                         <ul jqw-menu>

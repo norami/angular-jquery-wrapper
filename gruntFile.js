@@ -1,4 +1,8 @@
+/*global module, grunt, process*/
+/*jslint nomen:true*/
+
 module.exports = function (grunt) {
+    'use strict';
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-conventional-changelog');
@@ -9,9 +13,9 @@ module.exports = function (grunt) {
     // Default task.
     grunt.registerTask('default', ['jshint', 'karma', 'concat', 'copy', 'uglify']);
 
-    var testConfig = function(configFile, customOptions) {
-        var options = { configFile: configFile, keepalive: true };
-        var travisOptions = process.env.TRAVIS && { browsers: ['Firefox'], reporters: 'dots' };
+    var testConfig = function (configFile, customOptions) {
+        var options = { configFile: configFile, keepalive: true },
+            travisOptions = process.env.TRAVIS && { browsers: ['Firefox'], reporters: 'dots' };
         return grunt.util._.extend(options, customOptions, travisOptions);
     };
 
@@ -23,19 +27,9 @@ module.exports = function (grunt) {
                 options: testConfig('test/test.conf.js')
             }
         },
-        jshint:{
-            files:['src/**/*.js', 'test/**/*.js', 'demo/**/*.js', '!**/*.min.js'],
-            options:{
-                curly:true,
-                eqeqeq:true,
-                immed:true,
-                latedef:true,
-                newcap:true,
-                noarg:true,
-                sub:true,
-                boss:true,
-                eqnull:true,
-                globals:{}
+        jshint: {
+            files: ['src/**/*.js', 'test/**/*.js', 'demo/**/*.js', '!**/*.min.js'],
+            options: {
             }
         },
         copy: {
@@ -53,7 +47,7 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        uglify:{
+        uglify: {
             options: {
                 sourceMap: true,
                 banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */'

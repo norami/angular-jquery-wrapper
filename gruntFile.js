@@ -12,6 +12,7 @@ module.exports = function (grunt) {
 
     // Default task.
     grunt.registerTask('default', ['jshint', 'karma', 'concat', 'copy', 'uglify']);
+    grunt.registerTask('build', ['concat', 'copy', 'uglify']);
 
     var testConfig = function (configFile, customOptions) {
         var options = { configFile: configFile, keepalive: true },
